@@ -18,20 +18,14 @@ class ApiService {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
+        data: {
+          'name': name,
+        }
       );
 
       if (response.user == null) {
         return {'detail': 'Registration failed'};
       }
-
-      // Create user profile in 'users' table
-      final userId = response.user!.id;
-
-      final userResponse = await _supabase.from('users').insert({
-        'id': userId,
-        'name': name,
-        'email': email,
-      });
 
       return {'message': 'User registered successfully'};
     } catch (e) {
@@ -91,12 +85,13 @@ class ApiService {
       final user = _supabase.auth.currentUser;
 
       if (user != null) {
-        final response =
-            await _supabase.from('users').select().eq('id', user.id).single();
-
-        if (response != null) {
-          return app_user.User.fromJson(response);
-        }
+        return app_user.User(
+          id: user.id,
+          name: user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
+          email: user.email ?? '',
+          isVerified: user.emailConfirmedAt != null,
+          createdAt: user.createdAt,
+        );
       }
 
       return null;

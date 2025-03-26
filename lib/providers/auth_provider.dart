@@ -32,15 +32,16 @@ class AuthProvider extends ChangeNotifier {
         // Using Supabase auth directly
         final session = Supabase.instance.client.auth.currentSession;
         if (session != null && !session.isExpired) {
-          // Get user data from Supabase
-          final response = await Supabase.instance.client
-              .from('users')
-              .select()
-              .eq('email', session.user.email ?? '')
-              .single();
-
-          if (response != null) {
-            _user = app_models.User.fromJson(response);
+          // Create user directly from auth data
+          final supabaseUser = session.user;
+          if (supabaseUser != null) {
+            _user = app_models.User(
+              id: supabaseUser.id,
+              name: supabaseUser.userMetadata?['name'] ?? supabaseUser.email?.split('@')[0] ?? 'User',
+              email: supabaseUser.email ?? '',
+              isVerified: supabaseUser.emailConfirmedAt != null,
+              createdAt: supabaseUser.createdAt,
+            );
           }
         }
       }
@@ -90,15 +91,16 @@ class AuthProvider extends ChangeNotifier {
       final response = await ApiService.login(email, password);
 
       if (response['access_token'] != null) {
-        // Get user data from Supabase
-        final userResponse = await Supabase.instance.client
-            .from('users')
-            .select()
-            .eq('email', email)
-            .single();
-
-        if (userResponse != null) {
-          _user = app_models.User.fromJson(userResponse);
+        // Get user from auth session
+        final supabaseUser = Supabase.instance.client.auth.currentUser;
+        if (supabaseUser != null) {
+          _user = app_models.User(
+            id: supabaseUser.id,
+            name: supabaseUser.userMetadata?['name'] ?? supabaseUser.email?.split('@')[0] ?? 'User',
+            email: supabaseUser.email ?? '',
+            isVerified: supabaseUser.emailConfirmedAt != null,
+            createdAt: supabaseUser.createdAt,
+          );
           _isLoading = false;
           notifyListeners();
           return true;

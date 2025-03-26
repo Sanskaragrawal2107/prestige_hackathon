@@ -3,40 +3,73 @@ class Product {
   final String name;
   final String description;
   final double price;
-  final int stock;
+  final double? discountedPrice;
+  final bool inStock;
   final String imageUrl;
-  final String createdAt;
   final String category;
+  final String? brand;
+  final double? rating;
+  final String createdAt;
   final double discountPercentage;
+  final int stock;
 
   Product({
     required this.id,
     required this.name,
     required this.description,
     required this.price,
-    required this.stock,
+    this.discountedPrice,
+    this.inStock = true,
     required this.imageUrl,
     required this.createdAt,
+    required this.stock,
     this.category = '',
+    this.brand,
+    this.rating,
     this.discountPercentage = 0,
   });
 
-  double get discountedPrice {
-    if (discountPercentage <= 0) return price;
-    return price * (1 - discountPercentage / 100);
+  double get effectivePrice {
+    return discountedPrice ?? price;
+  }
+
+  double get savingsAmount {
+    return price - effectivePrice;
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    // Handle different numeric types from the database
+    double parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is int) return value.toDouble();
+      if (value is double) return value;
+      return double.parse(value.toString());
+    }
+
+    final price = parseDouble(json['price']);
+    final discountedPrice = json['discounted_price'] != null
+        ? parseDouble(json['discounted_price'])
+        : null;
+        
+    // Calculate discount percentage if we have a discounted price
+    final discountPercentage = (discountedPrice != null && price > 0)
+        ? ((price - discountedPrice) / price * 100)
+        : 0.0;
+
     return Product(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      price: json['price'].toDouble(),
-      stock: json['stock'],
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? 'Unnamed Product',
+      description: json['description'] ?? '',
+      price: price,
+      discountedPrice: discountedPrice,
+      inStock: json['in_stock'] ?? true,
       imageUrl: json['image_url'] ?? '',
-      createdAt: json['created_at'],
+      createdAt: json['created_at'] ?? DateTime.now().toIso8601String(),
       category: json['category'] ?? '',
-      discountPercentage: json['discount_percentage']?.toDouble() ?? 0.0,
+      brand: json['brand'],
+      rating: json['rating'] != null ? parseDouble(json['rating']) : null,
+      discountPercentage: discountPercentage,
+      stock: json['in_stock'] == true ? 10 : 0, // Default to 10 if in stock
     );
   }
 
@@ -46,11 +79,13 @@ class Product {
       'name': name,
       'description': description,
       'price': price,
-      'stock': stock,
+      'discounted_price': discountedPrice,
+      'in_stock': inStock,
       'image_url': imageUrl,
       'created_at': createdAt,
       'category': category,
-      'discount_percentage': discountPercentage,
+      'brand': brand,
+      'rating': rating,
     };
   }
 } 

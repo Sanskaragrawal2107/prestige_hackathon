@@ -104,8 +104,10 @@ class ApiService {
   static Future<List<Product>> getProducts(
       {int skip = 0, int limit = 20, String? category}) async {
     try {
+      print('Fetching products with skip=$skip, limit=$limit, category=$category');
+      
       // Build query
-      var query = _supabase.from('products').select();
+      var query = _supabase.from('products').select('*');
 
       // Add category filter if provided
       if (category != null && category.isNotEmpty) {
@@ -115,10 +117,26 @@ class ApiService {
       // Order by creation date (newest first) and add pagination
       final response = await query
           .order('created_at', ascending: false)
-          .range(skip, skip + limit - 1);
+          .range(skip, skip + limit - 1)
+          .execute();
+          
+      if (response.error != null) {
+        print('Supabase error fetching products: ${response.error!.message}');
+        return [];
+      }
 
-      final productsList =
-          (response as List).map((item) => Product.fromJson(item)).toList();
+      print('Products fetched successfully: ${response.data.length} items');
+      final data = response.data as List;
+      
+      final productsList = data.map((item) {
+        try {
+          return Product.fromJson(item);
+        } catch (e) {
+          print('Error parsing product: $e');
+          print('Product data: $item');
+          return null;
+        }
+      }).whereType<Product>().toList();
 
       return productsList;
     } catch (e) {
@@ -133,9 +151,21 @@ class ApiService {
           .from('products')
           .select()
           .eq('id', productId)
-          .single();
-
-      return Product.fromJson(response);
+          .single()
+          .execute();
+          
+      if (response.error != null) {
+        print('Supabase error fetching product: ${response.error!.message}');
+        return null;
+      }
+      
+      try {
+        return Product.fromJson(response.data);
+      } catch (e) {
+        print('Error parsing product: $e');
+        print('Product data: ${response.data}');
+        return null;
+      }
     } catch (e) {
       print('Error fetching product: $e');
       return null;
@@ -144,14 +174,28 @@ class ApiService {
 
   static Future<List<Product>> searchProducts(String query) async {
     try {
-      // Perform search using ilike for case-insensitive partial matches
       final response = await _supabase
           .from('products')
           .select()
-          .or('name.ilike.%$query%,description.ilike.%$query%');
+          .or('name.ilike.%$query%,description.ilike.%$query%')
+          .execute();
+          
+      if (response.error != null) {
+        print('Supabase error searching products: ${response.error!.message}');
+        return [];
+      }
 
-      final productsList =
-          (response as List).map((item) => Product.fromJson(item)).toList();
+      final data = response.data as List;
+      
+      final productsList = data.map((item) {
+        try {
+          return Product.fromJson(item);
+        } catch (e) {
+          print('Error parsing product in search: $e');
+          print('Product data: $item');
+          return null;
+        }
+      }).whereType<Product>().toList();
 
       return productsList;
     } catch (e) {

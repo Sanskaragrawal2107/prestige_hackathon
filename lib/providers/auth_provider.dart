@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/user.dart';
+import '../models/user.dart' as app_models;
 import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isInitializing = true;
-  User? _user;
+  app_models.User? _user;
   String? _error;
 
   bool get isLoading => _isLoading;
   bool get isInitializing => _isInitializing;
-  User? get user => _user;
+  app_models.User? get user => _user;
   String? get error => _error;
   bool get isAuthenticated => _user != null;
 
@@ -23,11 +23,11 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _checkCurrentUser() async {
     _isInitializing = true;
     notifyListeners();
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
-      
+
       if (token != null) {
         // Using Supabase auth directly
         final session = Supabase.instance.client.auth.currentSession;
@@ -36,12 +36,11 @@ class AuthProvider extends ChangeNotifier {
           final response = await Supabase.instance.client
               .from('users')
               .select()
-              .eq('email', session.user.email)
-              .single()
-              .execute();
-          
-          if (response.data != null) {
-            _user = User.fromJson(response.data);
+              .eq('email', session.user.email ?? '')
+              .single();
+
+          if (response != null) {
+            _user = app_models.User.fromJson(response);
           }
         }
       }
@@ -62,7 +61,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       // Use the API service to register
       final response = await ApiService.register(name, email, password);
-      
+
       if (response['message'] == 'User registered successfully') {
         _isLoading = false;
         notifyListeners();
@@ -89,18 +88,17 @@ class AuthProvider extends ChangeNotifier {
     try {
       // Use the API service to login
       final response = await ApiService.login(email, password);
-      
+
       if (response['access_token'] != null) {
         // Get user data from Supabase
         final userResponse = await Supabase.instance.client
             .from('users')
             .select()
             .eq('email', email)
-            .single()
-            .execute();
-        
-        if (userResponse.data != null) {
-          _user = User.fromJson(userResponse.data);
+            .single();
+
+        if (userResponse != null) {
+          _user = app_models.User.fromJson(userResponse);
           _isLoading = false;
           notifyListeners();
           return true;
@@ -145,4 +143,4 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
-} 
+}

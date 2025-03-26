@@ -61,7 +61,7 @@ flutter:
 
   assets:
     - images/login.jpg
-    - images/product_placeholder.png
+    - images/product_placeholder.jpg
 
   fonts:
     - family: nexa

@@ -34,7 +34,7 @@ class ProductCard extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 ),
                 errorWidget: (context, url, error) => Image.asset(
-                  'images/product_placeholder.png',
+                  'images/product_placeholder.jpg',
                   fit: BoxFit.cover,
                 ),
                 fit: BoxFit.cover,

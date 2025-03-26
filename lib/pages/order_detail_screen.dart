@@ -56,9 +56,9 @@ class OrderDetailScreen extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-              
+
               Divider(height: 32),
-              
+
               // Order items
               Text(
                 'Items',
@@ -102,7 +102,7 @@ class OrderDetailScreen extends StatelessWidget {
                                   ),
                           ),
                           SizedBox(width: 12),
-                          
+
                           // Product details
                           Expanded(
                             child: Column(
@@ -125,7 +125,7 @@ class OrderDetailScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          
+
                           // Item total
                           Text(
                             '\$${(item.quantity * item.product.price).toStringAsFixed(2)}',
@@ -140,9 +140,9 @@ class OrderDetailScreen extends StatelessWidget {
                   );
                 },
               ),
-              
+
               Divider(height: 32),
-              
+
               // Shipping address
               Text(
                 'Shipping Address',
@@ -177,9 +177,9 @@ class OrderDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               Divider(height: 32),
-              
+
               // Payment info
               Text(
                 'Payment Information',
@@ -203,21 +203,23 @@ class OrderDetailScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 4),
                       Text(order.paymentMethod),
-                      if (order.paymentMethod == 'Credit Card' && order.paymentDetails != null)
+                      if (order.paymentMethod == 'Credit Card' &&
+                          order.paymentDetails != null)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(height: 4),
-                            Text('Card ending in ${order.paymentDetails?['last4'] ?? '****'}'),
+                            Text(
+                                'Card ending in ${order.paymentDetails?['last4'] ?? '****'}'),
                           ],
                         ),
                     ],
                   ),
                 ),
               ),
-              
+
               Divider(height: 32),
-              
+
               // Order summary
               Text(
                 'Order Summary',
@@ -226,39 +228,39 @@ class OrderDetailScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
-              Card(
-                child: Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      _buildSummaryRow('Subtotal', '\$${order.subtotal.toStringAsFixed(2)}'),
-                      SizedBox(height: 8),
-                      _buildSummaryRow('Shipping', '\$${order.shippingCost.toStringAsFixed(2)}'),
-                      SizedBox(height: 8),
-                      _buildSummaryRow('Tax', '\$${order.taxAmount.toStringAsFixed(2)}'),
-                      if (order.discount > 0) ...[
-                        SizedBox(height: 8),
-                        _buildSummaryRow(
-                          'Discount',
-                          '-\$${order.discount.toStringAsFixed(2)}',
-                          valueColor: Colors.red,
-                        ),
-                      ],
-                      Divider(height: 24),
-                      _buildSummaryRow(
-                        'Total',
-                        '\$${order.totalAmount.toStringAsFixed(2)}',
-                        isBold: true,
-                        fontSize: 18,
-                      ),
-                    ],
-                  ),
-                ),
+              SizedBox(height: 16),
+              _buildSummaryRow(
+                'Subtotal',
+                '\$${order.subtotal.toStringAsFixed(2)}',
               ),
-              
+              SizedBox(height: 8),
+              _buildSummaryRow(
+                'Shipping',
+                '\$${order.shippingCost.toStringAsFixed(2)}',
+              ),
+              SizedBox(height: 8),
+              _buildSummaryRow(
+                'Tax',
+                '\$${order.taxAmount.toStringAsFixed(2)}',
+              ),
+              if (order.discount > 0) ...[
+                SizedBox(height: 8),
+                _buildSummaryRow(
+                  'Discount',
+                  '-\$${order.discount.toStringAsFixed(2)}',
+                  valueColor: Colors.red,
+                ),
+              ],
+              Divider(height: 24),
+              _buildSummaryRow(
+                'Total',
+                '\$${order.totalAmount.toStringAsFixed(2)}',
+                isBold: true,
+                fontSize: 18,
+              ),
+
               SizedBox(height: 24),
-              
+
               // Action buttons
               Row(
                 children: [
@@ -268,7 +270,9 @@ class OrderDetailScreen extends StatelessWidget {
                       label: Text('Need Help?'),
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Support feature not implemented yet')),
+                          SnackBar(
+                              content:
+                                  Text('Support feature not implemented yet')),
                         );
                       },
                     ),
@@ -280,7 +284,9 @@ class OrderDetailScreen extends StatelessWidget {
                       label: Text('Reorder'),
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Reorder feature not implemented yet')),
+                          SnackBar(
+                              content:
+                                  Text('Reorder feature not implemented yet')),
                         );
                       },
                     ),
@@ -342,4 +348,4 @@ class OrderDetailScreen extends StatelessWidget {
         return Colors.grey;
     }
   }
-} 
+}

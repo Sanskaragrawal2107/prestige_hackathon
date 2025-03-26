@@ -172,20 +172,14 @@ class ApiService {
       }
 
       // Check if item already exists in cart
-      final existingCartItem = await _supabase
+      final existingCartItemResponse = await _supabase
           .from('cart_items')
           .select()
           .eq('user_id', userId)
           .eq('product_id', productId)
           .maybeSingle();
 
-      if (existingCartItem != null) {
-        // Update quantity if item exists
-        final newQuantity = (existingCartItem['quantity'] as int) + quantity;
-        await _supabase
-            .from('cart_items')
-            .update({'quantity': newQuantity}).eq('id', existingCartItem['id']);
-      } else {
+      if (existingCartItemResponse == null) {
         // Insert new cart item
         await _supabase.from('cart_items').insert({
           'user_id': userId,
@@ -193,6 +187,13 @@ class ApiService {
           'quantity': quantity,
           'created_at': DateTime.now().toIso8601String(),
         });
+      } else {
+        // Update quantity if item exists
+        final newQuantity = (existingCartItemResponse['quantity'] as int) + quantity;
+        await _supabase
+            .from('cart_items')
+            .update({'quantity': newQuantity})
+            .eq('id', existingCartItemResponse['id']);
       }
 
       return true;
@@ -207,24 +208,26 @@ class ApiService {
       // Get cart items for user
       final response = await _supabase
           .from('cart_items')
-          .select('id, product_id, quantity, products(*)')
+          .select('id, product_id, quantity, products(*)') 
           .eq('user_id', userId);
 
       // Create new cart with items
       final cart = Cart.empty();
 
-      if (response != null) {
-        final cartItemsList = response as List;
-
-        for (var item in cartItemsList) {
-          final product = Product.fromJson(item['products']);
-          final cartItem = CartItem(
-            id: item['id'],
-            product: product,
-            quantity: item['quantity'],
-          );
-
-          cart.items.add(cartItem);
+      if (response != null && response is List && response.isNotEmpty) {
+        for (var item in response) {
+          try {
+            final product = Product.fromJson(item['products']);
+            final cartItem = CartItem(
+              id: item['id'],
+              product: product,
+              quantity: item['quantity'],
+            );
+            
+            cart.items.add(cartItem);
+          } catch (e) {
+            print('Error parsing cart item: $e');
+          }
         }
       }
 

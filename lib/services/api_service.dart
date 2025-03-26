@@ -15,13 +15,10 @@ class ApiService {
       String name, String email, String password) async {
     try {
       // Register with Supabase Auth
-      final response = await _supabase.auth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'name': name,
-        }
-      );
+      final response =
+          await _supabase.auth.signUp(email: email, password: password, data: {
+        'name': name,
+      });
 
       if (response.user == null) {
         return {'detail': 'Registration failed'};
@@ -87,10 +84,11 @@ class ApiService {
       if (user != null) {
         return app_user.User(
           id: user.id,
-          name: user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
+          name:
+              user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
           email: user.email ?? '',
           isVerified: user.emailConfirmedAt != null,
-          createdAt: user.createdAt,
+          createdAt: DateTime.parse(user.createdAt),
         );
       }
 

@@ -37,10 +37,12 @@ class AuthProvider extends ChangeNotifier {
           if (supabaseUser != null) {
             _user = app_models.User(
               id: supabaseUser.id,
-              name: supabaseUser.userMetadata?['name'] ?? supabaseUser.email?.split('@')[0] ?? 'User',
+              name: supabaseUser.userMetadata?['name'] ??
+                  supabaseUser.email?.split('@')[0] ??
+                  'User',
               email: supabaseUser.email ?? '',
               isVerified: supabaseUser.emailConfirmedAt != null,
-              createdAt: supabaseUser.createdAt,
+              createdAt: DateTime.parse(supabaseUser.createdAt),
             );
           }
         }
@@ -96,10 +98,12 @@ class AuthProvider extends ChangeNotifier {
         if (supabaseUser != null) {
           _user = app_models.User(
             id: supabaseUser.id,
-            name: supabaseUser.userMetadata?['name'] ?? supabaseUser.email?.split('@')[0] ?? 'User',
+            name: supabaseUser.userMetadata?['name'] ??
+                supabaseUser.email?.split('@')[0] ??
+                'User',
             email: supabaseUser.email ?? '',
             isVerified: supabaseUser.emailConfirmedAt != null,
-            createdAt: supabaseUser.createdAt,
+            createdAt: DateTime.parse(supabaseUser.createdAt),
           );
           _isLoading = false;
           notifyListeners();

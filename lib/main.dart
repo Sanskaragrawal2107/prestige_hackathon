@@ -25,7 +25,6 @@ void main() async {
     url: 'https://dmbyuzxazfqmvqdqegyn.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtYnl1enhhemZxbXZxZHFlZ3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5NzgyODIsImV4cCI6MjA1ODU1NDI4Mn0.YNtpistaMpTP7CajgyrtZyCa5cI3XLjg1nbguP806DQ',
   );
-
   runApp(MyApp());
 }
 
